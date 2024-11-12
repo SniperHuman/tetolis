@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .Canvas{
+            background-color: gray;
+            position: absolute;
+            left: 50%;
+            margin-right: -50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+
+<body>
+    <canvas class="Canvas">
+        <p>キャンバスが見えない人向けの説明。</p>
+    </canvas>
+    <script>
+        const canvas = document.querySelector(".Canvas");
+        const screen_width = (canvas.width = window.innerWidth);
+        const screen_height = (canvas.height = window.innerHeight);
+        const field = canvas.getContext("2d");
+        let generation_permission = true;
+        let hold_tetola = [];
+        let hold_first = true;
+        let hold_per = true;
+        let game = false;
+        let score = 0;
+        const map_x_plus = 200;
+        const map_y_plus = 5;
+        const red = 2,
+            blue = 3,
+            purple = 4,
+            green = 5,
+            skyblue = 6,
+            yellow = 7,
+            orange = 8;
+        let next_tetola = [];
+        /12*21/
+
+        let map = [
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        ]
+
+
+        const tetola_kinds = [
+            [
+                [5, 4, 5, 6],
+                [0, 1, 1, 1], 5, 1, "purple", purple, "rgb(114 50 163)"
+            ],
+            [
+                [4, 5, 5, 6],
+                [0, 0, 1, 1], 5, 1, "red", red, "rgb(242, 78, 78)"
+            ],
+            [
+                [4, 5, 5, 6],
+                [1, 1, 0, 0], 5, 1, "green", green, "rgb(154 205 50)"
+            ],
+            [
+                [4, 4, 5, 6],
+                [0, 1, 1, 1], 5, 1, "blue", blue, "rgb(82 105 236)"
+            ],
+            [
+                [4, 5, 6, 6],
+                [1, 1, 1, 0], 5, 1, "orange", orange, "rgb(245 170 104)"
+            ],
+            [
+                [4, 5, 6, 7],
+                [0, 0, 0, 0], 5.5, 0.5, "rgb(24 235 249)", skyblue, "rgb(179 225 255)"
+            ],
+            [
+                [5, 6, 5, 6],
+                [0, 0, 1, 1], 5.5, 0.5, "yellow", yellow, "rgb(255 255 198)"
+            ]
+        ];
+
+
+        function tetolis_delete() {
+            const temp_map = [
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+            ];
+            let count = 0;
+            for (let y = map.length - 2; - 1 < y; y--) {
+                let block_exit = 0;
+                for (let x = 0; x < map[0].length; x++) {
+                    if (map[y][x] > 0) {
+                        block_exit++;
+                    }
+                }
+                if (block_exit == map[0].length) {
+                    count++;
+                } else {
+                    temp_map.unshift(map[y])
+                }
+            }
+
+            for (let i = 0; i < count; i++) {
+                temp_map.unshift([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]);
+            }
+            if (count > 0) {
+                score += 200 * count - 100;
+            }
+            map = temp_map;
+
+        }
+
+        function Draw_rect(x1, y1, delta_x, delta_y, color) {
+            field.fillStyle = color;
+            field.fillRect(x1 + map_x_plus, y1 + map_y_plus, delta_x, delta_y);
+        }
+
+        function Draw_border(x1, y1, delta_x, delta_y, color) {
+            field.fillStyle = color;
+            field.strokeRect(x1 + map_x_plus, y1 + map_y_plus, delta_x, delta_y);
+        }
+
+        function Draw_text(text, x1, y1, font, color, maxwidth = 100) {
+            field.font = font;
+            field.fillStyle = color
+            field.fillText(text, x1, y1, maxwidth);
+        }
+
+        function Next_tetola_draw() {
+            let rect_size = 25;
+            for (let i = 1; i < next_tetola.length; i++) {
+                for (let k = 0; k < next_tetola[i][0].length; k++) {
+                    Draw_rect(rect_size * next_tetola[i][0][k] + 350, rect_size * next_tetola[i][1][k] + 100 * (i - 1) + 100, rect_size, rect_size, next_tetola[i][4]);
+                    Draw_rect(rect_size * next_tetola[i][0][k] + 5 + 350, rect_size * next_tetola[i][1][k] + 5 + 100 * (i - 1) + 100, rect_size - 10, rect_size - 10, next_tetola[i][6]);
+                    Draw_border(rect_size * next_tetola[i][0][k] + 350, rect_size * next_tetola[i][1][k] + 100 * (i - 1) + 100, rect_size, rect_size, "rgb(0 0 0)");
+                }
+            }
+            Draw_text("Next", 650, 100, '40px "IBM Plex Mono", monospace', "white");
+        }
+
+        function Hold_tetola_draw() {
+            let rect_size = 25;
+            if (!hold_first) {
+                for (let k = 0; k < hold_tetola[0].length; k++) {
+                    Draw_rect(rect_size * hold_tetola[0][0][k] - 200, rect_size * hold_tetola[0][1][k] + 100, rect_size, rect_size, hold_tetola[0][4]);
+                    Draw_rect(rect_size * hold_tetola[0][0][k] + 5 - 200, rect_size * hold_tetola[0][1][k] + 5 + 100, rect_size - 10, rect_size - 10, hold_tetola[0][6]);
+                    Draw_border(rect_size * hold_tetola[0][0][k] - 200, rect_size * hold_tetola[0][1][k] + 100, rect_size, rect_size, "rgb(0 0 0)");
+                }
+            }
+            Draw_text("Hold", 100, 100, '40px "IBM Plex Mono", monospace', "white");
+        }
+
+        function Score_draw() {
+            Draw_text("Score", 100, 300, '40px "IBM Plex Mono", monospace', "white");
+            Draw_text(String(score), 100, 350, '40px "IBM Plex Mono", monospace', "white");
+        }
+
+
+        function Map_draw() {
+            field.fillStyle = "black";
+            field.fillRect(0, 0, screen_width, screen_height);
+            let rect_size = 35;
+            for (let y = 0; y < 20; y++) {
+                for (let x = 1; x < 11; x++) {
+                    Draw_rect(rect_size * x, rect_size * y, rect_size, rect_size, "rgb(90 90 90)");
+                    Draw_border(rect_size * x, rect_size * y, rect_size, rect_size, "rgb(0 0 0)");
+                    for (let i = 0; i < tetola_kinds.length; i++) {
+                        if (map[y][x] == tetola_kinds[i][5]) {
+                            Draw_rect(rect_size * x, rect_size * y, rect_size, rect_size, tetola_kinds[i][4]);
+                            Draw_rect(rect_size * x + 5, rect_size * y + 5, rect_size - 10, rect_size - 10, tetola_kinds[i][6]);
+                            Draw_border(rect_size * x, rect_size * y, rect_size, rect_size, "rgb(0 0 0)");
+                            break;
+                        }
+                    }
+                }
+            }
+            let minus = -50;
+            const xbase = 100;
+            Draw_text("↑:hard-drop", xbase, 460 + minus, '20px "IBM Plex Mono", monospace', "white", 400);
+            Draw_text("←:left-move", xbase, 500 + minus, '20px "IBM Plex Mono", monospace', "white", 400);
+            Draw_text("→:right-move", xbase, 540 + minus, '20px "IBM Plex Mono", monospace', "white", 400);
+            Draw_text("↓:fast-drop", xbase, 580 + minus, '20px "IBM Plex Mono", monospace', "white", 400);
+            Draw_text("SPACE:hold", xbase, 620 + minus, '20px "IBM Plex Mono", monospace', "white", 400);
+            Draw_text("D:right-rotate", xbase, 660 + minus, '20px "IBM Plex Mono", monospace', "white", 400);
+            Draw_text("A:left-rotate", xbase, 700 + minus, '20px "IBM Plex Mono", monospace', "white", 400);
+            
+        }
+
+        function Tetola_add_constructor() {
+            let numbers = [0,1,2,3,4,5,6];
+            for (let i = 0; i < 7; i++) {
+                let random_i = Math.floor(Math.random() * (7-i));
+                next_tetola.push(tetola_kinds[numbers[random_i]])
+                numbers.splice(random_i,1);
+            }
+        }
+
+        let tetola_add_cnt = 0;
+        let add_numbers = [0,1,2,3,4,5,6];
+        function Tetola_add() {
+            if (tetola_add_cnt%7==0){
+                add_numbers = [0,1,2,3,4,5,6];
+            }
+            let random_i = Math.floor(Math.random() * (add_numbers.length));
+            next_tetola.shift();
+            next_tetola.push(tetola_kinds[add_numbers[random_i]])
+            
+            add_numbers.splice(random_i,1);
+            tetola_add_cnt+=1;
+        }
+
+        function Hold() {
+            if (hold_first) {
+                hold_tetola.push(next_tetola[0]);
+                Tetola_add();
+                let tetola = new Tetola();
+                tetola_array.pop();
+                tetola_array.push(tetola);
+                generation_permission = false;
+                tetola_now = tetola_array[0];
+                hold_first = false;
+                hold_per = false;
+
+            } else {
+                if (hold_per) {
+                    let temp = hold_tetola[0];
+                    hold_tetola[0] = next_tetola[0];
+                    next_tetola[0] = temp;
+                    let tetola = new Tetola();
+                    tetola_array.pop();
+                    tetola_array.push(tetola);
+                    generation_permission = false;
+                    tetola_now = tetola_array[0];
+                    hold_per = false;
+                }
+            }
+        }
+        let speed_ajust = true;
+
+        function game_management() {
+            if (score % 1000 <= 800) {
+                if (speed_ajust) {
+                    time_speed -= 50;
+                    clearInterval(main_run);
+                    main_run = setInterval(Main, time_speed);
+                    speed_ajust = false;
+                }
+            } else {
+                speed_ajust = true;
+            }
+        }
+
+        class Tetola {
+            constructor() {
+                this.size = 35;
+                this.block_x = next_tetola[0][0].slice();
+                this.block_y = next_tetola[0][1].slice();
+                this.center_x = next_tetola[0][2];
+                this.center_y = next_tetola[0][3];
+                this.color = next_tetola[0][4];
+                this.color_number = next_tetola[0][5];
+                this.color_second = next_tetola[0][6];
+                this.rotate_permission = true;
+                this.fall_permission = true;
+                this.move_right_per = true;
+                this.move_left_per = true;
+                this.gameOver = false;
+                this.game_over();
+
+            }
+
+
+            draw() {
+                Map_draw();
+                for (let i = 0; i < this.block_x.length; i++) {
+                    Draw_rect(this.block_x[i] * this.size, this.block_y[i] * this.size, this.size, this.size, this.color);
+                    Draw_rect(this.block_x[i] * this.size + 5, this.block_y[i] * this.size + 5, this.size - 10, this.size - 10, this.color_second);
+                    Draw_border(this.block_x[i] * this.size, this.block_y[i] * this.size, this.size, this.size, "rgb(0 0 0)");
+                }
+            }
+            hrad_drop() {
+                while (this.fall_permission) {
+                    this.fall();
+                }
+            }
+            game_over() {
+                for (let i = 0; i < this.block_x.length; i++) {
+                    if (map[this.block_y[i]][this.block_x[i]] >= 1) {
+                        this.gameOver = true;
+                    }
+                }
+                if (this.gameOver) {
+                    stopbgm();
+                    GameOver();
+                    console.log("gameover");
+                    clearInterval(main_run);
+                    let a = setInterval(Gameover, 100);
+                }
+            }
+
+            stop() {
+                generation_permission = true;
+                hold_per = true;
+                /*map add tetolra block*/
+                for (let i = 0; i < this.block_x.length; i++) {
+                    map[this.block_y[i]][this.block_x[i]] = this.color_number;
+                }
+                Tetola_add();
+                tetolis_delete();
+
+            }
+
+            move(direction) {
+                /*check left and right*/
+                this.move_right_per = true;
+                this.move_left_per = true;
+                for (let i = 0; i < this.block_x.length; i++) {
+                    if (map[this.block_y[i]][this.block_x[i] + 1] != 0) {
+                        this.move_right_per = false;
+                    }
+                    if (map[this.block_y[i]][this.block_x[i] - 1] != 0) {
+                        this.move_left_per = false;
+                    }
+                }
+
+                if (direction == 1 && this.move_right_per) {
+                    this.center_x += 1;
+                    for (let i = 0; i < this.block_x.length; i++) {
+                        this.block_x[i] += 1;
+                    }
+
+                } else if (direction == -1 && this.move_left_per) {
+                    this.center_x -= 1;
+                    for (let i = 0; i < this.block_x.length; i++) {
+                        this.block_x[i] -= 1;
+                    }
+
+                }
+
+            }
+
+            fall() {
+                for (let i = 0; i < this.block_x.length; i++) {
+                    if (map[this.block_y[i] + 1][this.block_x[i]] != 0) {
+                        this.fall_permission = false;
+                    }
+                }
+
+                if (this.fall_permission) {
+                    this.center_y += 1;
+                    for (let i = 0; i < this.block_x.length; i++) {
+                        this.block_y[i] += 1;
+                    }
+                } else {
+                    this.stop();
+                }
+            }
+
+            rotate(direction) {
+                let temp1_x = [];
+                let temp1_y = [];
+                this.rotate_permission = true;
+
+                /*in order to rotate*/
+                for (let i = 0; i < this.block_x.length; i++) {
+                    temp1_x.push(this.block_x[i] - this.center_x);
+                    temp1_y.push(this.block_y[i] - this.center_y);
+                }
+                let temp2_x = [];
+                let temp2_y = [];
+                let new_x, new_y;
+                for (let i = 0; i < temp1_x.length; i++) {
+                    if (direction == 1) {
+                        new_x = temp1_y[i] * (-1) + this.center_x;
+                        new_y = temp1_x[i] + this.center_y;
+                    } else if (direction == -1) {
+                        new_x = temp1_y[i] + this.center_x;
+                        new_y = temp1_x[i] * (-1) + this.center_y;
+                    }
+
+                    temp2_x.push(new_x);
+                    temp2_y.push(new_y);
+                    if (0 <= new_x && new_x < 12 && 0 <= new_y && new_y < 21) {
+                        if (map[new_y][new_x] != 0) {
+                            this.rotate_permission = false;
+                        }
+
+                    } else {
+                        this.rotate_permission = false;
+                    }
+                }
+
+                if (this.rotate_permission) {
+                    this.block_x = temp2_x;
+                    this.block_y = temp2_y;
+                }
+            }
+        }
+
+        let time_speed = 1000;
+        let main_run = setInterval(Main, time_speed);
+    
+        let tetola_array = [];
+        Tetola_add_constructor();
+        let tetola = new Tetola();
+        tetola_array.push(tetola);
+        let tetola_now = tetola_array[0];
+
+
+        function Gameover() {
+            field.fillStyle = "black";
+            field.fillRect(0, 0, screen_width, screen_height);
+            Draw_text("Gameover", 100, 100, '50px "IBM Plex Mono", monospace', "red", 400);
+            Draw_text("Reload this page to restart", 100, 200, '50px "IBM Plex Mono", monospace', "white", 500);
+            Draw_text("Your score is " + String(score), 100, 300, '50px "IBM Plex Mono", monospace', "white", 500);
+        }
+
+        window.addEventListener("keydown", (event) => {
+            if (!generation_permission) {
+                if (event.key == "a") {
+                    tetola_now.rotate(-1);
+                } else if (event.key == "d") {
+                    tetola_now.rotate(1);
+                } else if (event.key == "ArrowRight") {
+                    tetola_now.move(1);
+                } else if (event.key == "ArrowLeft") {
+                    tetola_now.move(-1);
+                } else if (event.key == "ArrowDown") {
+                    tetola_now.fall();
+                } else if (event.key == "ArrowUp") {
+                    tetola_now.hrad_drop();
+                    tetolis_delete();
+                } else if (event.key == "Space") {
+                    Hold();
+                } 
+                Draw_everything();
+            }
+
+
+        });
+
+        function Draw_everything() {
+            tetola_now.draw();
+            Next_tetola_draw();
+            Hold_tetola_draw();
+            Score_draw();
+
+        }
+
+
+        function Main() {
+            if (generation_permission) {
+                let tetola = new Tetola();
+                tetola_array.pop();
+                tetola_array.push(tetola);
+                generation_permission = false;
+                tetola_now = tetola_array[0];
+                Draw_everything();
+
+            } else {
+                tetola_now.fall();
+                Draw_everything();
+            }
+            game_management();
+
+            
+        }
+    </script>
+</body>
+
+</html>
