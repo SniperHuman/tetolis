@@ -17,6 +17,8 @@
             top: 50%;
             transform: translate(-50%, -50%);
         }
+
+        
     </style>
 </head>
 
@@ -24,7 +26,15 @@
     <canvas class="Canvas">
         <p>キャンバスが見えない人向けの説明。</p>
     </canvas>
+    
     <script>
+        const right_button = document.querySelector(".right")
+        const left_button = document.querySelector(".left")
+        const up_button = document.querySelector(".up")
+        const down_button = document.querySelector(".down")
+        const r_rotate_button = document.querySelector(".r_rotate")
+        const l_rotate_button = document.querySelector(".l_rotate")
+        const hold = document.querySelector(".hold")
         const canvas = document.querySelector(".Canvas");
         const screen_width = (canvas.width = window.innerWidth);
         const screen_height = (canvas.height = window.innerHeight);
@@ -203,7 +213,7 @@
             Draw_text("←:left-move", xbase, 500 + minus, '20px "IBM Plex Mono", monospace', "white", 400);
             Draw_text("→:right-move", xbase, 540 + minus, '20px "IBM Plex Mono", monospace', "white", 400);
             Draw_text("↓:fast-drop", xbase, 580 + minus, '20px "IBM Plex Mono", monospace', "white", 400);
-            Draw_text("SPACE:hold", xbase, 620 + minus, '20px "IBM Plex Mono", monospace', "white", 400);
+            Draw_text("Shift:hold", xbase, 620 + minus, '20px "IBM Plex Mono", monospace', "white", 400);
             Draw_text("D:right-rotate", xbase, 660 + minus, '20px "IBM Plex Mono", monospace', "white", 400);
             Draw_text("A:left-rotate", xbase, 700 + minus, '20px "IBM Plex Mono", monospace', "white", 400);
             
@@ -453,8 +463,9 @@
                 } else if (event.key == "ArrowUp") {
                     tetola_now.hrad_drop();
                     tetolis_delete();
-                } else if (event.key == "Space") {
+                } else if (event.key == "Shift") {
                     Hold();
+                    console.log("fa")
                 } 
                 Draw_everything();
             }
